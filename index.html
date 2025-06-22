@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <title>万博 優先レーン情報</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: linear-gradient(to bottom right, #e6f2ff, #ffffff);
+      color: #003366;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8em;
+      color: #0066cc;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    select, input[type="text"], input[type="date"], textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 5px;
+    }
+    .checkbox-group label {
+      font-weight: normal;
+    }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: #0099cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .submitted {
+      display: none;
+      margin-top: 20px;
+      padding: 10px;
+      background: #d4edda;
+      border: 1px solid #155724;
+      color: #155724;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>万博 優先レーン情報提供</h1>
+  <form id="laneForm">
+    <label>パビリオン名</label>
+    <input list="pavilionList" name="entry.1592637268" required placeholder="例: 日本館">
+    <datalist id="pavilionList">
+      <option value="日本館"><option value="アメリカ館"><option value="韓国館">
+      <option value="フランス館"><option value="中国館"><option value="未来の街パビリオン">
+      <option value="子ども未来館"><option value="ロボット館"><option value="その他">
+    </datalist>
+
+    <label>訪問日</label>
+    <input type="date" name="entry.921519062">
+
+    <label>優先レーンの有無</label>
+    <select name="entry.1095100196" required>
+      <option value="">選択してください</option>
+      <option value="あり">○ あり</option>
+      <option value="一部あり">△ 一部あり</option>
+      <option value="なし">× なし</option>
+      <option value="不明">？ 不明</option>
+    </select>
+
+    <label>使用したもの（複数可）</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" name="usedItems" value="ベビーカー"> ベビーカー</label>
+      <label><input type="checkbox" name="usedItems" value="障害者手帳"> 障害者手帳</label>
+      <label><input type="checkbox" name="usedItems" value="ヘルプマーク"> ヘルプマーク</label>
+      <label><input type="checkbox" name="usedItems" value="車椅子"> 車椅子</label>
+      <label><input type="checkbox" id="otherCheck" value="その他"> その他</label>
+    </div>
+    <input type="text" id="otherText" placeholder="その他の内容を入力" style="display:none; margin-top:10px;">
+
+    <label>補足情報（同伴者や状況など）</label>
+    <textarea name="entry.1125547682" rows="4"></textarea>
+
+    <button type="submit">送信</button>
+  </form>
+
+  <div id="confirmation" class="submitted">
+    ご協力ありがとうございます！送信されました。
+  </div>
+
+  <script>
+    const otherCheck = document.getElementById("otherCheck");
+    const otherText = document.getElementById("otherText");
+
+    otherCheck.addEventListener("change", () => {
+      otherText.style.display = otherCheck.checked ? "block" : "none";
+    });
+
+    document.getElementById("laneForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData();
+
+      const usedItems = [];
+      form.querySelectorAll('input[name="usedItems"]:checked').forEach(cb => {
+        usedItems.push(cb.value);
+      });
+      if (otherCheck.checked && otherText.value.trim() !== "") {
+        usedItems.push("その他: " + otherText.value.trim());
+      }
+
+      formData.append("entry.1592637268", form["entry.1592637268"].value);
+      formData.append("entry.921519062", form["entry.921519062"].value);
+      formData.append("entry.1095100196", form["entry.1095100196"].value);
+      formData.append("entry.1912534085", usedItems.join(", "));
+      formData.append("entry.1125547682", form["entry.1125547682"].value);
+
+      const action = "https://docs.google.com/forms/d/e/1FAIpQLSd66l51Cn5CezWiOsgkT1tZ-LHHfHwxKX_Qkk6d3dpQ_Xhfgg/formResponse";
+      fetch(action, {
+        method: "POST",
+        mode: "no-cors",
+        body: formData
+      }).then(() => {
+        document.getElementById("confirmation").style.display = "block";
+        form.reset();
+        otherText.style.display = "none";
+      });
+    });
+  </script>
+</body>
+</html>
